@@ -10,7 +10,7 @@ Android and iOS both supported.
 
 * [Maven](https://maven.apache.org/)
 
-* [TestNG Plugin](http://testng.org/doc/download.html) - TestNG Plugin is built-in in the IntelliJ IDEA, from version 7 onwards.
+* [TestNG Plugin](https://testng.org/) - TestNG Plugin is built-in in the IntelliJ IDEA, from version 7 onwards.
 
 
 ### How to Run Test
