@@ -1,4 +1,4 @@
-package com.perfecto.sampleproject;
+package com.perfecto.expensetracker;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ import com.perfecto.reportium.test.result.TestResultFactory;
 import io.appium.java_client.android.AndroidDriver;
 import static org.testng.Assert.assertTrue;
 
-public class PerfectoAppium {
+public class ExpenseTrackerLoginTest {
 	RemoteWebDriver driver;
 	ReportiumClient reportiumClient;
 
@@ -49,7 +49,7 @@ public class PerfectoAppium {
 			throw new RuntimeException("Perfecto Cloud Name and Security Token must be set as properties.");
 		}
 
-		String platformName = System.getProperty("platform", "Android");
+		String platformName = System.getProperty("platform", "Android"); //Android or iOS
 		cloudName = PerfectoLabUtils.fetchCloudName(cloudName);
 		securityToken = PerfectoLabUtils.fetchSecurityToken(securityToken);
 

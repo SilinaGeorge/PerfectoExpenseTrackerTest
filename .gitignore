@@ -23,6 +23,6 @@ build/
 *.iml
 .idea/
 output.txt
-src/main/java/com/perfecto/sampleproject/Temp.java
+src/main/java/com/perfecto/expensetracker/Temp.java
 temp.xml
 tmp

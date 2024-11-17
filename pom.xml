@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.perfecto</groupId>
-	<artifactId>sampleproject</artifactId>
+	<artifactId>expensetracker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>sampleproject</name>
+	<name>expensetracker</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -242,14 +242,4 @@
 
 	</dependencies>
 
-	<developers>
-		<developer>
-			<id>gt</id>
-			<name>Genesis Thomas</name>
-			<email>genesist@perfectomobile.com</email>
-			<url>https://developers.perfectomobile.com/questions/users?username=genesist</url>
-			<organization>Perfecto</organization>
-			<organizationUrl>https://www.perfecto.io</organizationUrl>
-		</developer>
-	</developers>
 </project>
