@@ -1,5 +1,7 @@
 package com.perfecto.sampleproject;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.appium.java_client.MobileElement;
@@ -48,45 +50,46 @@ public class PerfectoAppium {
 		// Replace <<security token>> with your perfecto security token or pass it as maven properties: -DsecurityToken=<<SECURITY TOKEN>>  More info: https://developers.perfectomobile.com/display/PD/Generate+security+tokens
 		String securityToken = "<<security token>>";
 		String platformName = System.getProperty("platform", "Android");
-		String localFilePath = System.getProperty("user.dir") + "//libs//ExpenseAppVer1.0.apk";
-
 		cloudName = PerfectoLabUtils.fetchCloudName(cloudName);
 		securityToken = PerfectoLabUtils.fetchSecurityToken(securityToken);
-
 		String browserName = "mobileOS";
+
 		DesiredCapabilities capabilities = new DesiredCapabilities(browserName, "", Platform.ANY);
 		if (platformName.equalsIgnoreCase("Android")) {
 			String repositoryKey = "PUBLIC:ExpenseTracker/Native/ExpenseAppVer1.0.apk";
+			String localFilePath = System.getProperty("user.dir") + "//libs//ExpenseAppVer1.0.apk";
 			// Uploads local apk file to Media repository
 			PerfectoLabUtils.uploadMedia(cloudName, securityToken, localFilePath, repositoryKey);
 
 			capabilities.setCapability("model", "Galaxy S.*|LG.*");
 			capabilities.setCapability("enableAppiumBehavior", true);
-			capabilities.setCapability("openDeviceTimeout", 2);
+			capabilities.setCapability("autoLaunch",true);
+			capabilities.setCapability("fullReset",true);
 			capabilities.setCapability("app", repositoryKey); // Set Perfecto Media repository path of App under test.
 			capabilities.setCapability("appPackage", "io.perfecto.expense.tracker"); // Set the unique identifier of your app
-			capabilities.setCapability("autoLaunch", true); // Whether to install and launch the app automatically.
 			capabilities.setCapability("takesScreenshot", false);
 			capabilities.setCapability("screenshotOnError", true); // Take screenshot only on errors
 			capabilities.setCapability("automationName", "Appium");
-			// The below capability is mandatory. Please do not replace it.
 			capabilities.setCapability("securityToken", securityToken);
+			capabilities.setCapability("sensorInstrument", true);
 
 		} else if (platformName.equalsIgnoreCase("iOS")) {
 			String repositoryKey = "PUBLIC:ExpenseTracker/Native/InvoiceApp1.0.ipa";
-			// Uploads local apk file to Media repository
+			String localFilePath = System.getProperty("user.dir") + "//libs//InvoiceApp1.0.ipa";
 			PerfectoLabUtils.uploadMedia(cloudName, securityToken, localFilePath, repositoryKey);
 
-			capabilities.setCapability("model", "iPhone*15*");
-			capabilities.setCapability("enableAppiumBehavior", true);
-			capabilities.setCapability("openDeviceTimeout", 2);
+			capabilities.setCapability("autoLaunch",true);
+			capabilities.setCapability("fullReset",true);
+			capabilities.setCapability("iOSResign",true);
+			capabilities.setCapability("model", "iPhone-15 Plus");
+			capabilities.setCapability("bundleId", "io.perfecto.expense.tracker"); // Set the unique identifier of your app
 			capabilities.setCapability("app", repositoryKey); // Set Perfecto Media repository path of App under test.
-			capabilities.setCapability("appPackage", "io.perfecto.expense.tracker"); // Set the unique identifier of your app
-			capabilities.setCapability("autoLaunch", true); // Whether to install and launch the app automatically.
+			capabilities.setCapability("automationName", "Appium");
+			capabilities.setCapability("enableAppiumBehavior", true);
+			capabilities.setCapability("iOSResign",true);
+			capabilities.setCapability("sensorInstrument", true);
 			capabilities.setCapability("takesScreenshot", false);
 			capabilities.setCapability("screenshotOnError", true); // Take screenshot only on errors
-			capabilities.setCapability("automationName", "Appium");
-			// The below capability is mandatory. Please do not replace it.
 			capabilities.setCapability("securityToken", securityToken);
 
 		} else {
@@ -113,28 +116,43 @@ public class PerfectoAppium {
 		reportiumClient = PerfectoLabUtils.setReportiumClient(driver, reportiumClient); //Creates reportiumClient
 		reportiumClient.testStart("Expense Tracker Login Mobile Test", new TestContext("ios", "android", "login"));
 
-		reportiumClient.stepStart("Enter email");
+		reportiumClient.stepStart("Enter Email");
 		MobileElement emailField = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(
 				driver.findElement(By.id("login_email"))));
 		emailField.clear();
 		emailField.sendKeys(email);
 		reportiumClient.stepEnd();
 
-		reportiumClient.stepStart("Enter password");
+		reportiumClient.stepStart("Enter Password");
 		MobileElement passwordField = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(
 				driver.findElement(By.id("login_password"))));
 		passwordField.clear();
 		passwordField.sendKeys(password);
 		reportiumClient.stepEnd();
 
-		reportiumClient.stepStart("Click login");
+		reportiumClient.stepStart("Enable Biometric");
+		MobileElement biometricSelect = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(
+				driver.findElement(driver instanceof AndroidDriver? By.id("login_biometric_check_box"): By.xpath(
+						"//*[@value]"))));
+		if(!biometricSelect.isSelected()) {
+			biometricSelect.click();
+		}
+		reportiumClient.stepEnd();
+
+		reportiumClient.stepStart("Click Login");
 		MobileElement loginButton = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(
-				driver.findElement(By.id("login_login_btn"))));
+				driver.findElement(driver instanceof AndroidDriver?By.id("login_login_btn"):By.xpath("//*[@name='Login']"))));
 		loginButton.click();
 		reportiumClient.stepEnd();
 
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		if (shouldLoginSucceed) {
+			reportiumClient.stepStart("Biometric Auth");
+			Map<String, Object> params = new HashMap<>();
+			params.put("identifier", "io.perfecto.expense.tracker");
+			params.put("resultAuth", "success");
+			params.put("errorType", "authFailed");
+			driver.executeScript("mobile:sensorAuthentication:set", params);
+			reportiumClient.stepEnd();
 
 			reportiumClient.stepStart("Login Successful");
 			MobileElement listAddButton = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(
@@ -144,26 +162,37 @@ public class PerfectoAppium {
 
 			reportiumClient.stepStart("Click Hamburger Menu");
 			MobileElement hamburgerMenu = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(
-					driver.findElement((By.xpath("//*[@content-desc='Open Drawer']")))));
+						driver.findElement(driver instanceof AndroidDriver?By.xpath("//*[@content-desc='Open Drawer']"): By.id("list_left_menu_btn"))));
 			hamburgerMenu.click();
 			reportiumClient.stepEnd();
 
-			reportiumClient.stepStart("Go to About Page");
-			MobileElement aboutItem = (MobileElement) driver.findElement(By.xpath("//*[@text='About']"));
+			reportiumClient.stepStart("Click About Page Menu Item");
+			MobileElement aboutItem = (MobileElement) driver.findElement(By.xpath(driver instanceof AndroidDriver?"//*[@text='About']":"//*[@name='list_about_menu']"));
 			aboutItem.click();
 			reportiumClient.stepEnd();
 
 			reportiumClient.stepStart("Click Crash Me");
 			MobileElement crashButton = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(
-					driver.findElement(By.id("crash_me_button"))));
+					driver.findElement(driver instanceof AndroidDriver?By.id("crash_me_button"): By.xpath("//*[@name='Crash Me']"))));
 			crashButton.click();
 			reportiumClient.stepEnd();
 
 		} else {
 			reportiumClient.stepStart("Login Invalid");
 			driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
-			MobileElement snackbar = (MobileElement) driver.findElement(By.id("snackbar_text"));
-			assertEquals(snackbar.getText(), "Invalid email or password", "Expected error message not shown.");
+			MobileElement invalidLoginElement;
+			MobileElement okButton = null;
+			if (driver instanceof AndroidDriver) {
+				invalidLoginElement = (MobileElement) driver.findElement(By.id("snackbar_text"));
+			}
+			else{
+				invalidLoginElement = (MobileElement) driver.findElement(By.xpath("//*[@label='Invalid email or password']"));
+				okButton = (MobileElement) driver.findElement(By.xpath("//XCUIElementTypeAlert/XCUIElementTypeOther[1]/XCUIElementTypeOther[1]/XCUIElementTypeOther[2]/XCUIElementTypeScrollView[2]"));
+			}
+			assertEquals(invalidLoginElement.getText(), "Invalid email or password", "Expected error message not shown.");
+			if(okButton != null){
+				okButton.click();
+			}
 			reportiumClient.stepEnd();
 		}
 
