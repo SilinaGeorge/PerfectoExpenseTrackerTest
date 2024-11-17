@@ -10,9 +10,6 @@ Android and iOS both supported.
 
 * [Maven](https://maven.apache.org/)
 
-* [TestNG Plugin](https://testng.org/) - TestNG Plugin is built-in in the IntelliJ IDEA, from version 7 onwards.
-
-
 ### How to Run Test
 	mvn clean
 	mvn install -DcloudName=${cloudName} -DsecurityToken=${securityToken} -Dplatform=${Android/iOS}
