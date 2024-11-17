@@ -43,13 +43,13 @@ public class ExpenseTrackerLoginTest {
 
 	@BeforeTest
 	public void setUp() throws Exception {
-		String cloudName = "<<cloud name>>";
-		String securityToken = "<<security token>>";
+		String cloudName = "<<cloud name>>"; // -DcloudName=${cloudName}
+		String securityToken = "<<security token>>"; // -DsecurityToken=${securityToken}
 		if (cloudName == null || securityToken == null) {
 			throw new RuntimeException("Perfecto Cloud Name and Security Token must be set as properties.");
 		}
 
-		String platformName = System.getProperty("platform", "Android"); //Android or iOS
+		String platformName = System.getProperty("platform", "Android"); // -Dplatform=${Android/iOS}
 		cloudName = PerfectoLabUtils.fetchCloudName(cloudName);
 		securityToken = PerfectoLabUtils.fetchSecurityToken(securityToken);
 
