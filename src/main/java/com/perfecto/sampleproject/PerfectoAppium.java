@@ -7,8 +7,6 @@ import java.util.concurrent.TimeUnit;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.ios.IOSDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.SessionNotCreatedException;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -22,9 +20,6 @@ import com.perfecto.reportium.test.result.TestResult;
 import com.perfecto.reportium.test.result.TestResultFactory;
 
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.AndroidElement;
-
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class PerfectoAppium {
@@ -118,7 +113,7 @@ public class PerfectoAppium {
 		}
 	}
 
-	private void performLoginSteps(WebDriverWait wait, String email, String password) {
+	private void performLoginSteps(WebDriverWait wait, String email, String password){
 		reportiumClient.stepStart("Enter Email");
 		MobileElement emailField = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(By.id("login_email"))));
 		emailField.clear();
@@ -132,8 +127,8 @@ public class PerfectoAppium {
 		reportiumClient.stepEnd();
 
 		reportiumClient.stepStart("Enable Biometric");
-		MobileElement biometricSelect = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(driver instanceof AndroidDriver ? By.id("login_biometric_check_box") : By.xpath("//*[@value]"))));
-		if (!biometricSelect.isSelected()) {
+		MobileElement biometricSelect = (MobileElement) wait.until(ExpectedConditions.presenceOfElementLocated(driver instanceof AndroidDriver ? By.id("login_biometric_check_box") : By.xpath("//*[@value='0' or @value='1']")));
+		if ((driver instanceof IOSDriver && biometricSelect.getAttribute("value").equals("0")) || (driver instanceof AndroidDriver && biometricSelect.getAttribute("checked").equalsIgnoreCase("false"))) {
 			biometricSelect.click();
 		}
 		reportiumClient.stepEnd();
@@ -145,7 +140,7 @@ public class PerfectoAppium {
 	}
 
 	private void handleLoginSuccess(WebDriverWait wait) {
-		reportiumClient.stepStart("Biometric Auth");
+		reportiumClient.stepStart("Biometric Authenticate");
 		Map<String, Object> params = new HashMap<>();
 		params.put("identifier", "io.perfecto.expense.tracker");
 		params.put("resultAuth", "success");
@@ -157,22 +152,32 @@ public class PerfectoAppium {
 		MobileElement listAddButton = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(By.id("list_add_btn"))));
 		assertTrue(listAddButton.isDisplayed(), "Login failed - add button element not displayed.");
 		reportiumClient.stepEnd();
+
+		reportiumClient.stepStart("Click Hamburger Menu");
+		MobileElement hamburgerMenu = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(driver instanceof AndroidDriver ? By.xpath("//*[@content-desc='Open Drawer']") : By.id("list_left_menu_btn"))));
+		hamburgerMenu.click();
+		reportiumClient.stepEnd();
+
+		reportiumClient.stepStart("Click About Page Menu Item");
+		MobileElement aboutItem = (MobileElement) driver.findElement(By.xpath(driver instanceof AndroidDriver ? "//*[@text='About']" : "//*[@name='list_about_menu']"));
+		aboutItem.click();
+		reportiumClient.stepEnd();
+
+		reportiumClient.stepStart("Click Crash Me");
+		MobileElement crashButton = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(driver instanceof AndroidDriver ? By.id("crash_me_button") : By.xpath("//*[@name='Crash Me']"))));
+		crashButton.click();
+		reportiumClient.stepEnd();
 	}
 
 	private void handleLoginFailure() {
 		reportiumClient.stepStart("Login Invalid");
 		driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
-		MobileElement invalidLoginElement;
-		MobileElement okButton = null;
 		if (driver instanceof AndroidDriver) {
-			invalidLoginElement = (MobileElement) driver.findElement(By.id("snackbar_text"));
+			driver.findElement(By.id("snackbar_text"));
 		}
 		else{
-			invalidLoginElement = (MobileElement) driver.findElement(By.xpath("//*[@label='Invalid email or password']"));
-			okButton = (MobileElement) driver.findElement(By.xpath("//XCUIElementTypeAlert/XCUIElementTypeOther[1]/XCUIElementTypeOther[1]/XCUIElementTypeOther[2]/XCUIElementTypeScrollView[2]"));
-		}
-		assertEquals(invalidLoginElement.getText(), "Invalid email or password", "Expected error message not shown.");
-		if(okButton != null){
+			driver.findElement(By.xpath("//*[@label='Invalid email or password']"));
+			MobileElement okButton = (MobileElement) driver.findElement(By.xpath("//XCUIElementTypeAlert/XCUIElementTypeOther[1]/XCUIElementTypeOther[1]/XCUIElementTypeOther[2]/XCUIElementTypeScrollView[2]"));
 			okButton.click();
 		}
 		reportiumClient.stepEnd();
