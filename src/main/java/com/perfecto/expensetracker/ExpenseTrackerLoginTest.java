@@ -72,9 +72,6 @@ public class ExpenseTrackerLoginTest {
 	}
 
 	private void setupAndroidCapabilities(String cloudName, String securityToken, DesiredCapabilities capabilities) throws Exception {
-		String localFilePath = System.getProperty("user.dir") + "//libs//ExpenseAppVer1.0.apk";
-		PerfectoLabUtils.uploadMedia(cloudName, securityToken, localFilePath, EXPENSE_APP_REPO_KEY_ANDROID);
-
 		capabilities.setCapability("model", ANDROID_MODEL);
 		capabilities.setCapability("app", EXPENSE_APP_REPO_KEY_ANDROID);
 		capabilities.setCapability("appPackage", PACKAGE_NAME);
@@ -85,9 +82,6 @@ public class ExpenseTrackerLoginTest {
 	}
 
 	private void setupIOSCapabilities(String cloudName, String securityToken, DesiredCapabilities capabilities) throws Exception {
-		String localFilePath = System.getProperty("user.dir") + "//libs//InvoiceApp1.0.ipa";
-		PerfectoLabUtils.uploadMedia(cloudName, securityToken, localFilePath, EXPENSE_APP_REPO_KEY_IOS);
-
 		capabilities.setCapability("model", IOS_MODEL);
 		capabilities.setCapability("app", EXPENSE_APP_REPO_KEY_IOS);
 		capabilities.setCapability("bundleId", PACKAGE_NAME);
@@ -142,7 +136,7 @@ public class ExpenseTrackerLoginTest {
 	private void handleLoginSuccess(WebDriverWait wait) {
 		reportiumClient.stepStart("Biometric Authenticate");
 		Map<String, Object> params = new HashMap<>();
-		params.put("identifier", "io.perfecto.expense.tracker");
+		params.put("identifier", PACKAGE_NAME);
 		params.put("resultAuth", "success");
 		params.put("errorType", "authFailed");
 		driver.executeScript("mobile:sensorAuthentication:set", params);
