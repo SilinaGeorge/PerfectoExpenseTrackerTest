@@ -13,7 +13,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
-
 import com.perfecto.reportium.client.ReportiumClient;
 import com.perfecto.reportium.test.TestContext;
 import com.perfecto.reportium.test.result.TestResult;
@@ -133,7 +132,7 @@ public class ExpenseTrackerLoginTest {
 		reportiumClient.stepEnd();
 	}
 
-	private void handleLoginSuccess(WebDriverWait wait) {
+	private void handleLoginSuccess(WebDriverWait wait) throws InterruptedException {
 		reportiumClient.stepStart("Biometric Authenticate");
 		Map<String, Object> params = new HashMap<>();
 		params.put("identifier", PACKAGE_NAME);
@@ -160,6 +159,7 @@ public class ExpenseTrackerLoginTest {
 		reportiumClient.stepStart("Click Crash Me");
 		MobileElement crashButton = (MobileElement) wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(driver instanceof AndroidDriver ? By.id("crash_me_button") : By.xpath("//*[@name='Crash Me']"))));
 		crashButton.click();
+		Thread.sleep(2000);
 		reportiumClient.stepEnd();
 	}
 
